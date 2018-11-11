@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Index</title>
+    <link rel="stylesheet" href="static/libs/uikit/css/uikit.min.css"/>
+    <link rel="stylesheet" href="static/css/core.css"/>
+    <script src="static/libs/uikit/js/uikit.min.js"></script>
+    <script src="static/libs/uikit/js/uikit-icons.min.js"></script>
+    <script src="static/libs/amcharts/amcharts.js"></script>
+    <script src="static/libs/amcharts/serial.js"></script>
+    <script src="static/js/index.js"></script>
+</head>
+<body>
+    <div id="data" data-latencies="{{ latencies }}" data-targets="{{ targets | join(",") }}">
+
+    <ul uk-tab>
+        <li class="uk-active"><a href="">Latency</a></li>
+    </ul>
+
+    <ul class="uk-switcher uk-margin">
+        <li>
+            <div class="uk-container uk-container-large">
+                <div class="uk-text-center" uk-grid>
+                    {% for target in targets %}
+                        <div class="uk-width-1-2">
+                            <div class="uk-card uk-card-default uk-card-body latency-graph-container">
+                                <div class="latency-graph" id="target-{{ target }}"></div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </li>
+    </ul>
+</body>
+</html>

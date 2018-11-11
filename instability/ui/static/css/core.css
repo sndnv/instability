@@ -1,0 +1,8 @@
+.latency-graph {
+    width: 100%;
+    height: 400px;
+}
+
+.latency-graph-container {
+    padding: 0;
+}
