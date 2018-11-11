@@ -8,6 +8,7 @@
     <script src="static/libs/uikit/js/uikit-icons.min.js"></script>
     <script src="static/libs/amcharts/amcharts.js"></script>
     <script src="static/libs/amcharts/serial.js"></script>
+    <script src="static/libs/amcharts/amstock.js"></script>
     <script src="static/js/index.js"></script>
 </head>
 <body>
@@ -23,7 +24,8 @@
                 <div class="uk-text-center" uk-grid>
                     {% for target in targets %}
                         <div class="uk-width-1-2">
-                            <div class="uk-card uk-card-default uk-card-body latency-graph-container">
+                            <div class="uk-card uk-card-body latency-graph-container">
+                                <span class="uk-label">{{ target }}</span>
                                 <div class="latency-graph" id="target-{{ target }}"></div>
                             </div>
                         </div>

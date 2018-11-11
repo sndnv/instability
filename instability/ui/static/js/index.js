@@ -6,125 +6,141 @@ window.onload = function() {
 
     var charts = targets.map(target => {
         var chart = render_latency_graph(target, latencies[target], graph_max_latency);
-        chart.addListener("zoomed", syncZoom);
-        chart.addListener("changed", syncCursor);
         return chart;
     });
-
-    function syncZoom(event) {
-        for (x in charts) {
-            if (charts[x].ignoreZoom) {
-                charts[x].ignoreZoom = false;
-            }
-            if (event.chart != charts[x]) {
-                charts[x].ignoreZoom = true;
-                charts[x].zoomToDates(event.startDate, event.endDate);
-            }
-        }
-    }
-
-    function syncCursor(event) {
-        if (!isNaN(event.index)) {
-            for (x in charts) {
-                charts[x].chartCursor.showCursorAt(charts[x].chartData[event.index].time);
-            }
-        } else {
-            for (x in charts) {
-                  charts[x].chartCursor.forceShow = false;
-                  charts[x].chartCursor.hideCursor(false);
-            }
-        }
-    }
 }
 
 function render_latency_graph(target, latencies, graph_max_latency) {
     return new AmCharts.makeChart("target-" + target, {
-        "type": "serial",
-        "titles": [
+        "type": "stock",
+        "theme": "light",
+        "categoryAxesSettings": {
+            "minPeriod": "mm"
+        },
+        "dataSets": [
             {
-                "text": target,
-                "size": 15
+                "fieldMappings": [
+                    {
+                        "fromField": "_average",
+                        "toField": "average"
+                    },
+                    {
+                        "fromField": "_maximum",
+                        "toField": "maximum"
+                    },
+                    {
+                        "fromField": "_minimum",
+                        "toField": "minimum"
+                    },
+                    {
+                        "fromField": "_loss",
+                        "toField": "loss"
+                    }
+                ],
+                "dataProvider": latencies,
+                "categoryField": "_timestamp"
             }
         ],
-        "dataDateFormat": "YYYY-MM-DD JJ:NN:SS",
-        "dataProvider": latencies,
-        "graphs": [
+        "panels": [
             {
-                "id": "minimum",
-                "title": "Minimum",
-                "hidden": true,
-                "valueAxis": "latency",
-                "fillAlphas": 0.4,
-                "valueField": "_minimum",
-                "balloonText": "<div style='margin:5px;'>Minimum: <b>[[value]]</b> ms</div>"
+                "title": "Latency",
+                "percentHeight": 80,
+                "stockGraphs": [
+                    {
+                        "id": "maximum",
+                        "valueField": "maximum",
+                        "fillAlphas": 0.4,
+                        "hidden": true,
+                        "balloonText": "<div>Maximum: <b>[[value]]</b> ms</div>",
+                        "useDataSetColors": false
+                    },
+                    {
+                        "id": "average",
+                        "valueField": "average",
+                        "fillAlphas": 0.4,
+                        "balloonText": "<div>Average: <b>[[value]]</b> ms</div>",
+                        "useDataSetColors": false
+                    },
+                    {
+                        "id": "minimum",
+                        "valueField": "minimum",
+                        "fillAlphas": 0.4,
+                        "hidden": true,
+                        "balloonText": "<div>Minimum: <b>[[value]]</b> ms</div>",
+                        "useDataSetColors": false
+                    }
+                ],
+                "stockLegend": {
+                    "periodValueTextComparing": "[[percents.value.close]]%",
+                    "periodValueTextRegular": "[[value.close]]"
+                }
             },
             {
-                "id": "maximum",
-                "title": "Maximum",
-                "hidden": true,
-                "valueAxis": "latency",
-                "fillAlphas": 0.4,
-                "valueField": "_maximum",
-                "balloonText": "<div style='margin:5px;'>Maximum: <b>[[value]]</b> ms</div>"
-            },
-            {
-                "id": "average",
-                "title": "Average",
-                "valueAxis": "latency",
-                "fillAlphas": 0.4,
-                "valueField": "_average",
-                "balloonText": "<div style='margin:5px;'>Average: <b>[[value]]</b> ms</div>"
-            },
-            {
-                "id": "loss",
                 "title": "Loss",
-                "valueAxis": "loss",
-                "lineColor": "#FF6600",
-                "valueField": "_loss",
-                "balloonText": "<div style='margin:5px;'>Loss: <b>[[value]]</b>%</div>"
+                "percentHeight": 20,
+                "stockGraphs": [
+                    {
+                        "id": "loss",
+                        "valueField": "loss",
+                        "fillAlphas": 0.4,
+                        "balloonText": "<div>Loss: <b>[[value]]</b>%</div>",
+                        "useDataSetColors": false
+                    }
+                ]
             }
         ],
-        "chartScrollbar": {
+        "chartScrollbarSettings": {
             "graph": "average",
-            "scrollbarHeight": 40,
-            "backgroundAlpha": 0,
-            "selectedBackgroundAlpha": 0.1,
-            "selectedBackgroundColor": "#888888",
-            "graphFillAlpha": 0,
-            "graphLineAlpha": 0.5,
-            "selectedGraphFillAlpha": 0,
-            "selectedGraphLineAlpha": 1,
-            "autoGridCount": true,
-            "color": "#AAAAAA"
+            "usePeriod": "mm",
+            "position": "top"
         },
-        "categoryField": "_timestamp",
-        "chartCursor": {
-            "categoryBalloonDateFormat": "JJ:NN:SS, DD MMM",
-            "cursorPosition": "mouse"
+
+        "chartCursorSettings": {
+            "valueBalloonsEnabled": true
         },
-        "valueAxes": [
-            {
-                "id": "latency",
-                "position": "left",
-                "title": "Latency (ms)",
-                "minimum": 0,
-                "maximum": graph_max_latency
-            },
-            {
-                "id": "loss",
-                "position": "right",
-                "title": "Loss (%)",
-                "minimum": 0,
-                "maximum": 100
-            }
-        ],
-        "legend": {
-            "useGraphSettings": true
+        "periodSelector": {
+            "position": "bottom",
+            "dateFormat": "YYYY-MM-DD JJ:NN",
+            "inputFieldWidth": 150,
+            "periods": [
+                {
+                    "period": "hh",
+                    "count": 1,
+                    "label": "1 hour"
+                },
+                {
+                    "period": "hh",
+                    "count": 2,
+                    "label": "2 hours"
+                },
+                {
+                    "period": "hh",
+                    "count": 5,
+                    "label": "5 hour"
+                },
+                {
+                    "period": "hh",
+                    "count": 12,
+                    "selected": true,
+                    "label": "12 hours"
+                },
+                {
+                    "period": "hh",
+                    "count": 24,
+                    "label": "24 hours"
+                },
+                {
+                    "period": "MAX",
+                    "label": "MAX"
+                }
+            ]
         },
-        "categoryAxis": {
-            "parseDates": true,
-            "minPeriod": "ss"
+        "panelsSettings": {
+          "usePrefixes": true
         },
-        "pathToImages": "static/libs/amcharts/images/"
+        "valueAxesSettings": {
+            "minimum": 0,
+            "maximum": graph_max_latency
+        }
     });
 }
