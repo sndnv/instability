@@ -12,10 +12,14 @@
     <script src="static/js/index.js"></script>
 </head>
 <body>
-    <div id="data" data-latencies="{{ latencies }}" data-targets="{{ targets | join(",") }}">
+    <div id="data"
+         data-speeds="{{ speeds }}"
+         data-latencies="{{ latencies }}"
+         data-targets="{{ targets | join(",") }}">
 
     <ul uk-tab>
         <li class="uk-active"><a href="">Latency</a></li>
+        <li class="uk-active"><a href="">Speed</a></li>
     </ul>
 
     <ul class="uk-switcher uk-margin">
@@ -30,6 +34,18 @@
                             </div>
                         </div>
                     {% endfor %}
+                </div>
+            </div>
+        </li>
+        <li>
+            <div class="uk-container uk-container-large">
+                <div class="uk-text-center" uk-grid>
+                    <div class="uk-width-1-1">
+                        <div class="uk-card uk-card-body speed-graph-container">
+                            <span class="uk-label">Network Speed</span>
+                            <div class="speed-graph" id="speed"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </li>

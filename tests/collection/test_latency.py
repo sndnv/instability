@@ -1,6 +1,6 @@
 import unittest
 
-from instability.collection.Latency import ping, Latency
+from instability.collection.Latency import from_ping, Latency
 
 
 class LatencySpec(unittest.TestCase):
@@ -14,7 +14,7 @@ class LatencySpec(unittest.TestCase):
             maximum=0.0
         )
 
-        actual_latency = ping(target="localhost", count=4)
+        actual_latency = from_ping(target="localhost", count=4)
 
         self.assertEqual(expected_latency.loss, actual_latency.loss)
         self.assertLess(expected_latency.average, actual_latency.average)

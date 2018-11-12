@@ -1,8 +1,8 @@
-.latency-graph {
+.latency-graph, .speed-graph {
     width: 100%;
     height: 25rem;
 }
 
-.latency-graph-container {
+.latency-graph-container, .speed-graph-container {
     padding: 0;
 }

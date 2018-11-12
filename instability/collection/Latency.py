@@ -2,23 +2,27 @@ import pingparsing
 from datetime import datetime
 
 
-def ping(target, count=10):
+def from_ping(target, count=10):
     transmitter = pingparsing.PingTransmitter()
     transmitter.destination_host = target
     transmitter.count = count
 
     parser = pingparsing.PingParsing()
 
-    raw_result = transmitter.ping()
-    result = parser.parse(raw_result).as_dict()
+    raw_result = parser.parse(transmitter.ping())
 
-    return Latency(
-        target=target,
-        loss=result['packet_loss_rate'],
-        average=result['rtt_avg'],
-        minimum=result['rtt_min'],
-        maximum=result['rtt_max']
-    )
+    if raw_result:
+        result = raw_result.as_dict()
+
+        return Latency(
+            target=target,
+            loss=result['packet_loss_rate'],
+            average=result['rtt_avg'],
+            minimum=result['rtt_min'],
+            maximum=result['rtt_max']
+        )
+    else:
+        return None
 
 
 class Latency:

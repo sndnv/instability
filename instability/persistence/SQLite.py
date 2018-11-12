@@ -1,5 +1,7 @@
 import sqlite3
+
 from instability.collection.Latency import Latency
+from instability.collection.Speed import Speed
 
 
 class SQLite:
@@ -19,31 +21,22 @@ class SQLite:
         self._connection.close()
 
     def latency_table_exists(self):
-        query = "SELECT name FROM sqlite_master WHERE type='table' AND name='latencies'"
-        self.db.execute(query)
-        exists = len(self.db.fetchone() or []) != 0
-        return exists
+        return self.__table_exists(Latency)
+
+    def speed_table_exists(self):
+        return self.__table_exists(Speed)
 
     def latency_table_size(self):
-        query = "SELECT count(*) FROM latencies"
-        self.db.execute(query)
-        count = self.db.fetchone()[0]
-        return count
+        return self.__table_size(Latency)
+
+    def speed_table_size(self):
+        return self.__table_size(Speed)
 
     def latency_table_create(self):
-        command = (
-            "CREATE TABLE latencies ("
-            "target text,"
-            "loss double,"
-            "average double,"
-            "minimum double,"
-            "maximum double,"
-            "timestamp timestamp"
-            ")"
-        )
+        self.__table_create(Latency)
 
-        self.db.execute(command)
-        self._connection.commit()
+    def speed_table_create(self):
+        self.__table_create(Speed)
 
     def latency_add(self, latency):
         command = "INSERT INTO latencies VALUES (?, ?, ?, ?, ?, ?)"
@@ -61,46 +54,110 @@ class SQLite:
         )
         self._connection.commit()
 
-    def latency_get(self):
-        query = (
-            "SELECT target, loss, average, minimum, maximum, timestamp FROM latencies"
-        )
+    def speed_add(self, speed):
+        command = "INSERT INTO speeds VALUES (?, ?, ?, ?)"
 
-        self.db.execute(query)
-        latencies = list(
-            map(
-                lambda row: Latency(
-                    target=row[0],
-                    loss=row[1],
-                    average=row[2],
-                    minimum=row[3],
-                    maximum=row[4],
-                    timestamp=row[5]
-                ),
-                self.db.fetchall()
+        self.db.execute(
+            command,
+            (
+                speed.server,
+                speed.download,
+                speed.upload,
+                speed.timestamp
             )
         )
+        self._connection.commit()
 
-        return latencies
+    def latency_get(self):
+        return self.__get(Latency)
+
+    def speed_get(self):
+        return self.__get(Speed)
 
     def latency_get_between(self, start, end):
-        query = (
-            "SELECT target, loss, average, minimum, maximum, timestamp FROM latencies "
-            "WHERE timestamp BETWEEN ? AND ?"
-        )
-        self.db.execute(query, (start, end))
-        latencies = list(
-            map(
-                lambda row: Latency(
-                    target=row[0],
-                    loss=row[1],
-                    average=row[2],
-                    minimum=row[3],
-                    maximum=row[4],
-                    timestamp=row[5]
-                ),
-                self.db.fetchall()
-            )
-        )
+        return self.__get_between(Latency, start, end)
 
-        return latencies
+    def speed_get_between(self, start, end):
+        return self.__get_between(Speed, start, end)
+
+    def __table_exists(self, collection_data_type):
+        table = self.__collection_data_to_table(collection_data_type)
+        query = "SELECT name FROM sqlite_master WHERE type='table' AND name='{}'".format(table)
+        self.db.execute(query)
+        exists = len(self.db.fetchone() or []) != 0
+        return exists
+
+    def __table_size(self, collection_data_type):
+        table = self.__collection_data_to_table(collection_data_type)
+        query = "SELECT count(*) FROM {}".format(table)
+        self.db.execute(query)
+        count = self.db.fetchone()[0]
+        return count
+
+    def __table_create(self, collection_data_type):
+        table = self.__collection_data_to_table(collection_data_type)
+        table_fields = self.__collection_data_to_table_field_definitions(collection_data_type)
+        command = "CREATE TABLE {} ({})".format(table, table_fields)
+
+        self.db.execute(command)
+        self._connection.commit()
+
+    def __get(self, collection_data_type):
+        table = self.__collection_data_to_table(collection_data_type)
+        table_fields = self.__collection_data_to_table_fields(collection_data_type)
+        query = "SELECT {} FROM {}".format(table_fields, table)
+
+        self.db.execute(query)
+        collection_data = list(map(self.__row_to_collection_data(collection_data_type), self.db.fetchall()))
+
+        return collection_data
+
+    def __get_between(self, collection_data_type, start, end):
+        table = self.__collection_data_to_table(collection_data_type)
+        table_fields = self.__collection_data_to_table_fields(collection_data_type)
+        query = "SELECT {} FROM {} WHERE timestamp BETWEEN ? AND ?".format(table_fields, table)
+
+        self.db.execute(query, (start, end))
+        speeds = list(map(self.__row_to_collection_data(collection_data_type), self.db.fetchall()))
+
+        return speeds
+
+    @staticmethod
+    def __collection_data_to_table(collection_data_type):
+        return {
+            Latency: "latencies",
+            Speed: "speeds"
+        }.get(collection_data_type, None)
+
+    @staticmethod
+    def __collection_data_to_table_field_definitions(collection_data_type):
+        return {
+            Latency: "target text, loss double, average double, minimum double, maximum double, timestamp timestamp",
+            Speed: "server text, download double, upload double, timestamp timestamp"
+        }.get(collection_data_type, None)
+
+    @staticmethod
+    def __collection_data_to_table_fields(collection_data_type):
+        return {
+            Latency: "target, loss, average, minimum, maximum, timestamp",
+            Speed: "server, download, upload, timestamp"
+        }.get(collection_data_type, None)
+
+    @staticmethod
+    def __row_to_collection_data(collection_data_type):
+        return {
+            Latency: lambda row: Latency(
+                target=row[0],
+                loss=row[1],
+                average=row[2],
+                minimum=row[3],
+                maximum=row[4],
+                timestamp=row[5]
+            ),
+            Speed: lambda row: Speed(
+                server=row[0],
+                download=row[1],
+                upload=row[2],
+                timestamp=row[3]
+            )
+        }.get(collection_data_type, None)

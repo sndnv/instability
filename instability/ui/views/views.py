@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from itertools import groupby
 import json
 
@@ -39,7 +39,19 @@ class IndexView:
             (k, list(map(lambda e: e.__dict__, g))) for k, g in groupby(sorted(latencies, key=grouping_field), grouping_field)
         )
 
+        for _, latencies_group in latencies.items():
+            for latency in latencies_group:
+                latency['_timestamp'] = latency['_timestamp'].replace(tzinfo=timezone.utc).astimezone(tz=None)
+
+        speeds = store.speed_get_between(start, end)
+        speeds = list(map(lambda e: e.__dict__, speeds))
+        for speed in speeds:
+            speed['_download'] = round(speed['_download'] / 1000 / 1000, 2)
+            speed['_upload'] = round(speed['_upload'] / 1000 / 1000, 2)
+            speed['_timestamp'] = speed['_timestamp'].replace(tzinfo=timezone.utc).astimezone(tz=None)
+
         return {
             'targets': latencies.keys(),
-            'latencies': json.dumps(latencies, default=str)
+            'latencies': json.dumps(latencies, default=str),
+            'speeds': json.dumps(speeds, default=str)
         }

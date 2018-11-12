@@ -3,6 +3,7 @@ import unittest
 from datetime import datetime, timedelta
 
 from instability.collection.Latency import Latency
+from instability.collection.Speed import Speed
 from instability.persistence.SQLite import SQLite
 
 
@@ -19,6 +20,12 @@ class SQLiteSpec(unittest.TestCase):
             self.assertFalse(store.latency_table_exists())
             store.latency_table_create()
             self.assertTrue(store.latency_table_exists())
+
+    def test_should_create_speed_table(self):
+        with SQLite(db=self.db_file) as store:
+            self.assertFalse(store.speed_table_exists())
+            store.speed_table_create()
+            self.assertTrue(store.speed_table_exists())
 
     def test_should_add_latencies(self):
         with SQLite(db=self.db_file) as store:
@@ -42,6 +49,27 @@ class SQLiteSpec(unittest.TestCase):
             store.latency_add(latency)
             store.latency_add(latency)
             self.assertEqual(store.latency_table_size(), 4)
+
+    def test_should_add_speeds(self):
+        with SQLite(db=self.db_file) as store:
+            speed = Speed(
+                server="test-server",
+                download=1,
+                upload=2
+            )
+
+            store.speed_table_create()
+            self.assertEqual(store.speed_table_size(), 0)
+
+            store.speed_add(speed)
+            self.assertEqual(store.speed_table_size(), 1)
+
+            store.speed_add(speed)
+            self.assertEqual(store.speed_table_size(), 2)
+
+            store.speed_add(speed)
+            store.speed_add(speed)
+            self.assertEqual(store.speed_table_size(), 4)
 
     def test_should_query_latencies(self):
         with SQLite(db=self.db_file) as store:
@@ -76,6 +104,36 @@ class SQLiteSpec(unittest.TestCase):
 
             expected_list = [latency_1, latency_2, latency_3]
             actual_list = store.latency_get()
+
+            self.assertListEqual(expected_list, actual_list)
+
+    def test_should_query_speeds(self):
+        with SQLite(db=self.db_file) as store:
+            speed_1 = Speed(
+                server="test-server",
+                download=1,
+                upload=2
+            )
+
+            speed_2 = Speed(
+                server="test-server",
+                download=3,
+                upload=4
+            )
+
+            speed_3 = Speed(
+                server="test-server",
+                download=5,
+                upload=6
+            )
+
+            store.speed_table_create()
+            store.speed_add(speed_1)
+            store.speed_add(speed_2)
+            store.speed_add(speed_3)
+
+            expected_list = [speed_1, speed_2, speed_3]
+            actual_list = store.speed_get()
 
             self.assertListEqual(expected_list, actual_list)
 
@@ -115,6 +173,42 @@ class SQLiteSpec(unittest.TestCase):
 
             expected_list = [latency_1, latency_3]
             actual_list = store.latency_get_between(
+                start=datetime.utcnow() + timedelta(days=-10),
+                end=datetime.utcnow() + timedelta(days=1)
+            )
+
+            self.assertListEqual(expected_list, actual_list)
+
+    def test_should_query_speed_in_interval(self):
+        with SQLite(db=self.db_file) as store:
+            speed_1 = Speed(
+                server="test-server",
+                download=1,
+                upload=2,
+                timestamp=datetime.utcnow() + timedelta(days=-3)
+            )
+
+            speed_2 = Speed(
+                server="test-server",
+                download=1,
+                upload=2,
+                timestamp=datetime.utcnow() + timedelta(days=2)
+            )
+
+            speed_3 = Speed(
+                server="test-server",
+                download=1,
+                upload=2,
+                timestamp=datetime.utcnow() + timedelta(days=-5)
+            )
+
+            store.speed_table_create()
+            store.speed_add(speed_1)
+            store.speed_add(speed_2)
+            store.speed_add(speed_3)
+
+            expected_list = [speed_1, speed_3]
+            actual_list = store.speed_get_between(
                 start=datetime.utcnow() + timedelta(days=-10),
                 end=datetime.utcnow() + timedelta(days=1)
             )

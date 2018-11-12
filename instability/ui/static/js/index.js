@@ -1,12 +1,91 @@
 window.onload = function() {
     var data = document.getElementById("data")
     var latencies = JSON.parse(data.dataset.latencies);
+    var speeds = JSON.parse(data.dataset.speeds);
     var targets = data.dataset.targets.split(",");
     var graph_max_latency = 100; // TODO
 
     var charts = targets.map(target => {
         var chart = render_latency_graph(target, latencies[target], graph_max_latency);
         return chart;
+    });
+
+    var speed_chart = render_speed_graph(speeds)
+}
+
+function render_speed_graph(speeds) {
+    return new AmCharts.makeChart("speed", {
+        "type": "serial",
+        "dataProvider": speeds,
+        "graphs": [
+            {
+                "id": "download",
+                "balloonText": "Download: <b>[[value]]</b> Mbps",
+                "title": "Download",
+                "lineColor": "green",
+                "valueField": "_download",
+                "connect": false
+            },
+            {
+                "id": "upload",
+                "balloonText": "Upload <b>[[value]]</b> Mbps",
+                "title": "Upload",
+                "lineColor": "blue",
+                "valueField": "_upload",
+                "connect": false
+            }
+        ],
+        "categoryField": "_timestamp",
+        "chartCursor": {
+            "categoryBalloonDateFormat": "JJ:NN:SS, DD MMM",
+            "cursorPosition": "mouse"
+        },
+        "legend": {
+            "useGraphSettings": true
+        },
+        "categoryAxis": {
+            "parseDates": true,
+            "minPeriod": "hh"
+        },
+        "chartScrollbar": {
+            "graph": "download",
+            "scrollbarHeight": 40,
+            "backgroundAlpha": 0,
+            "selectedBackgroundAlpha": 0.1,
+            "selectedBackgroundColor": "#888888",
+            "graphFillAlpha": 0,
+            "graphLineAlpha": 0.5,
+            "selectedGraphFillAlpha": 0,
+            "selectedGraphLineAlpha": 1,
+            "autoGridCount": true,
+            "color": "#AAAAAA"
+        },
+        "valueAxes": [
+            {
+                "position": "left",
+                "title": "Speed (Mbps)",
+                "minimum": 0,
+                "maximum": 300,
+                "guides": [
+                    {
+                        "dashLength": 3,
+                        "inside": true,
+                        "lineColor": "green",
+                        "label": "Down / Max",
+                        "lineAlpha": 0.6,
+                        "value": 200
+                    },
+                    {
+                        "dashLength": 3,
+                        "inside": true,
+                        "lineColor": "blue",
+                        "label": "Up / Max",
+                        "lineAlpha": 0.6,
+                        "value": 20
+                    }
+                ]
+            }
+        ]
     });
 }
 
@@ -52,14 +131,16 @@ function render_latency_graph(target, latencies, graph_max_latency) {
                         "fillAlphas": 0.4,
                         "hidden": true,
                         "balloonText": "<div>Maximum: <b>[[value]]</b> ms</div>",
-                        "useDataSetColors": false
+                        "useDataSetColors": false,
+                        "connect": false
                     },
                     {
                         "id": "average",
                         "valueField": "average",
                         "fillAlphas": 0.4,
                         "balloonText": "<div>Average: <b>[[value]]</b> ms</div>",
-                        "useDataSetColors": false
+                        "useDataSetColors": false,
+                        "connect": false
                     },
                     {
                         "id": "minimum",
@@ -67,7 +148,8 @@ function render_latency_graph(target, latencies, graph_max_latency) {
                         "fillAlphas": 0.4,
                         "hidden": true,
                         "balloonText": "<div>Minimum: <b>[[value]]</b> ms</div>",
-                        "useDataSetColors": false
+                        "useDataSetColors": false,
+                        "connect": false
                     }
                 ],
                 "stockLegend": {
@@ -84,7 +166,8 @@ function render_latency_graph(target, latencies, graph_max_latency) {
                         "valueField": "loss",
                         "fillAlphas": 0.4,
                         "balloonText": "<div>Loss: <b>[[value]]</b>%</div>",
-                        "useDataSetColors": false
+                        "useDataSetColors": false,
+                        "connect": false
                     }
                 ]
             }

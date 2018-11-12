@@ -12,13 +12,22 @@ def main():
     )
 
     targets = [target.strip() for target in os.getenv("LATENCY_TARGETS", "").split(",")]
-    interval = os.getenv("COLLECTION_INTERVAL", 60)
+    latency_interval = os.getenv("LATENCY_COLLECTION_INTERVAL", 60)
+    speed_interval = os.getenv("SPEED_COLLECTION_INTERVAL", 60 * 60)
 
-    collection_service = CollectionService(db="store.db", targets=targets, collection_interval=interval)
+    collection_service = CollectionService(
+        db="store.db", targets=targets,
+        latency_collection_interval=latency_interval,
+        speed_collection_interval=speed_interval
+    )
+
     ui_service = UIService(db="store.db", host="localhost", port=8000)
 
-    collection_thread = Thread(target=collection_service.start)
-    collection_thread.start()
+    latency_collection_thread = Thread(target=collection_service.start_latency_collection)
+    latency_collection_thread.start()
+
+    speed_collection_thread = Thread(target=collection_service.start_speed_collection)
+    speed_collection_thread.start()
 
     ui_service.start()
 
