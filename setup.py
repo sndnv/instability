@@ -6,9 +6,10 @@ requires = [
     'pyramid_jinja2',
     'waitress',
     'iso8601',
+    'speedtest-cli'
 ]
 
 setup(
-    name='tutorial',
+    name='instability',
     install_requires=requires,
 )

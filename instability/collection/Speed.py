@@ -4,16 +4,21 @@ from speedtest import Speedtest
 
 
 def from_speedtest():
-    speedtest = Speedtest()
-    speedtest.get_best_server()
-    speedtest.download()
-    speedtest.upload()
+    try:
+        speedtest = Speedtest()
+        speedtest.get_best_server()
+        speedtest.download()
+        speedtest.upload()
 
-    return Speed(
-        download=speedtest.results.download,
-        upload=speedtest.results.upload,
-        server=speedtest.results.server['host']
-    )
+        return Speed(
+            download=speedtest.results.download,
+            upload=speedtest.results.upload,
+            server=speedtest.results.server['host']
+        )
+    except (KeyboardInterrupt, SystemExit):
+        raise
+    except:
+        return None
 
 
 class Speed:

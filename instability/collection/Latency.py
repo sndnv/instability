@@ -9,9 +9,8 @@ def from_ping(target, count=10):
 
     parser = pingparsing.PingParsing()
 
-    raw_result = parser.parse(transmitter.ping())
-
-    if raw_result:
+    try:
+        raw_result = parser.parse(transmitter.ping())
         result = raw_result.as_dict()
 
         return Latency(
@@ -21,7 +20,9 @@ def from_ping(target, count=10):
             minimum=result['rtt_min'],
             maximum=result['rtt_max']
         )
-    else:
+    except (KeyboardInterrupt, SystemExit):
+        raise
+    except:
         return None
 
 

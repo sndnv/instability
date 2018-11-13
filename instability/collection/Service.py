@@ -26,9 +26,6 @@ class Service:
 
     def start_latency_collection(self):
         with SQLite(self.db) as store:
-            if not store.latency_table_exists():
-                store.latency_table_create()
-
             while True:
                 latencies = self.pool.map(lambda target: (target, from_ping(target)), self.targets)
 
@@ -51,19 +48,19 @@ class Service:
 
     def start_speed_collection(self):
         with SQLite(self.db) as store:
-            if not store.speed_table_exists():
-                store.speed_table_create()
-
             while True:
                 speed = self.pool.apply(from_speedtest)
 
-                self.log.debug(
-                    "Collected speed data for server [{}]: [{}/{}] (down/up)".format(
-                        speed.server,
-                        speed.download,
-                        speed.upload
+                if speed:
+                    self.log.debug(
+                        "Collected speed data for server [{}]: [{}/{}] (down/up)".format(
+                            speed.server,
+                            speed.download,
+                            speed.upload
+                        )
                     )
-                )
-                store.speed_add(speed)
+                    store.speed_add(speed)
+                else:
+                    self.log.error("Failed to collect speed data")
 
                 time.sleep(self.speed_collection_interval)
