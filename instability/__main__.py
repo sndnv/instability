@@ -22,7 +22,7 @@ def main():
     speed_interval = int(os.getenv("SPEED_COLLECTION_INTERVAL", 60 * 60))
 
     collection_service = CollectionService(
-        db="store.db", targets=targets,
+        db=data_store, targets=targets,
         latency_collection_interval=latency_interval,
         speed_collection_interval=speed_interval
     )
