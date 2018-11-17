@@ -10,9 +10,13 @@
     <script src="static/libs/amcharts/serial.js"></script>
     <script src="static/libs/amcharts/amstock.js"></script>
     <script src="static/js/index.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
     <div id="data"
+         data-start="{{ period_start }}"
+         data-end="{{ period_end }}"
          data-speeds="{{ speeds }}"
          data-latencies="{{ latencies }}"
          data-targets="{{ targets | join(",") }}">
@@ -21,6 +25,14 @@
         <li class="uk-active"><a href="">Latency</a></li>
         <li class="uk-active"><a href="">Speed</a></li>
     </ul>
+
+    <div class="uk-text-center">
+        <input id="period-range" type="text" placeholder="Report Period" readonly="readonly"
+               class="flatpickr flatpickr-input active uk-input uk-form-width-large uk-form-small uk-text-center">
+        <input id="max-latency" type="number" placeholder="Max Latency" step="10"
+               class="uk-input uk-form-width-small uk-form-small uk-text-center">
+        <button id="update-report-button" class="uk-button uk-button-secondary uk-button-small">Update</button>
+    </div>
 
     <ul class="uk-switcher uk-margin">
         <li>

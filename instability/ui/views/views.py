@@ -13,6 +13,9 @@ class IndexView:
         self.request = request
         self.log = logging.getLogger("index-view")
 
+    def utc_to_local(self, utc):
+        return utc.replace(tzinfo=timezone.utc).astimezone(tz=None)
+
     @view_config(route_name='index', request_method='GET')
     def index(self):
         store = self.request.registry.store
@@ -41,16 +44,21 @@ class IndexView:
 
         for _, latencies_group in latencies.items():
             for latency in latencies_group:
-                latency['_timestamp'] = latency['_timestamp'].replace(tzinfo=timezone.utc).astimezone(tz=None)
+                latency['_timestamp'] = self.utc_to_local(latency['_timestamp'])
 
         speeds = store.speed_get_between(start, end)
         speeds = list(map(lambda e: e.__dict__, speeds))
         for speed in speeds:
             speed['_download'] = round(speed['_download'] / 1000 / 1000, 2)
             speed['_upload'] = round(speed['_upload'] / 1000 / 1000, 2)
-            speed['_timestamp'] = speed['_timestamp'].replace(tzinfo=timezone.utc).astimezone(tz=None)
+            speed['_timestamp'] = self.utc_to_local(speed['_timestamp'])
+
+        start = self.utc_to_local(start).strftime("%Y-%m-%d %H:%M:%S")
+        end = self.utc_to_local(end).strftime("%Y-%m-%d %H:%M:%S")
 
         return {
+            'period_start': start,
+            'period_end': end,
             'targets': latencies.keys(),
             'latencies': json.dumps(latencies, default=str),
             'speeds': json.dumps(speeds, default=str)

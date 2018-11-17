@@ -3,14 +3,48 @@ window.onload = function() {
     var latencies = JSON.parse(data.dataset.latencies);
     var speeds = JSON.parse(data.dataset.speeds);
     var targets = data.dataset.targets.split(",");
-    var graph_max_latency = 100; // TODO
+    var period_start = data.dataset.start;
+    var period_end = data.dataset.end
+
+    var params = new URLSearchParams(window.location.search);
+
+    var graph_max_latency = params.get("max_latency") || 100;
+
+    var speed_chart = render_speed_graph(speeds)
+
+    var period_control = flatpickr("#period-range", {
+        enableTime: true,
+        mode: "range",
+        time_24hr: true,
+        dateFormat: "Y-m-d H:i:S",
+        defaultDate: [period_start, period_end]
+    });
+
+    var max_latency_control = document.getElementById("max-latency");
+    max_latency_control.value = graph_max_latency;
+
+    var update_report_button = document.getElementById("update-report-button");
+    update_report_button.onclick = function() {
+        var selectedDates = period_control.selectedDates;
+        var start = selectedDates[0];
+        var end = selectedDates[1];
+
+        update_report_query(start, end, max_latency_control.value);
+    };
 
     var charts = targets.map(target => {
         var chart = render_latency_graph(target, latencies[target], graph_max_latency);
         return chart;
     });
+}
 
-    var speed_chart = render_speed_graph(speeds)
+function update_report_query(start, end, max_latency) {
+    if(start != null && end != null && max_latency != null) {
+        var baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
+        var newUrl = `${baseUrl}?start=${start.toISOString()}&end=${end.toISOString()}&max_latency=${max_latency}`;
+
+        location.href = newUrl;
+    }
 }
 
 function render_speed_graph(speeds) {
@@ -28,7 +62,7 @@ function render_speed_graph(speeds) {
             },
             {
                 "id": "upload",
-                "balloonText": "Upload <b>[[value]]</b> Mbps",
+                "balloonText": "Upload: <b>[[value]]</b> Mbps",
                 "title": "Upload",
                 "lineColor": "blue",
                 "valueField": "_upload",
