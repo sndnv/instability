@@ -1,8 +1,17 @@
-import pingparsing
 from datetime import datetime
+
+import pingparsing
 
 
 def from_ping(target, count=10):
+    """
+    Collects latency data based on `ping`.
+
+    :param target: destination host to ping
+    :param count: number of pings to perform (default is 10)
+    :return: latency data
+    """
+
     transmitter = pingparsing.PingTransmitter()
     transmitter.destination_host = target
     transmitter.count = count
@@ -28,6 +37,16 @@ def from_ping(target, count=10):
 
 class Latency:
     def __init__(self, target, loss, average, minimum, maximum, timestamp=None):
+        """
+        Latency data container.
+
+        :param target: destination host associated with the data
+        :param loss: packet loss rate (as a percentage)
+        :param average: average latency (in ms)
+        :param minimum: minimum latency (in ms)
+        :param maximum: maximum latency (in ms)
+        :param timestamp: data collection timestamp
+        """
         self._target = target
         self._loss = loss
         self._average = average

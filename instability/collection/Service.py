@@ -10,6 +10,15 @@ from instability.persistence.SQLite import SQLite
 
 class Service:
     def __init__(self, db, targets, latency_collection_interval, speed_collection_interval):
+        """
+        Data collection service.
+
+        :param db: SQLite db file name
+        :param targets: host to use for collecting latency data
+        :param latency_collection_interval: latency data collection interval (in seconds)
+        :param speed_collection_interval: network speed data collection interval (in seconds)
+        """
+
         self.db = db
         self.targets = targets
         self.latency_collection_interval = latency_collection_interval
@@ -25,6 +34,14 @@ class Service:
         self.pool.terminate()
 
     def start_latency_collection(self):
+        """
+        Starts latency data collection and stores it in the configured SQLite database (table must already exist).
+
+        **Note**: `Blocks the current thread indefinitely.`
+
+        :return: `nothing`
+        """
+
         with SQLite(self.db) as store:
             while True:
                 latencies = self.pool.map(lambda target: (target, from_ping(target)), self.targets)
@@ -47,6 +64,14 @@ class Service:
                 time.sleep(self.latency_collection_interval)
 
     def start_speed_collection(self):
+        """
+        Starts network speed data collection and stores it in the configured SQLite database (table must already exist).
+
+        **Note**: `Blocks the current thread indefinitely.`
+
+        :return: `nothing`
+        """
+
         with SQLite(self.db) as store:
             while True:
                 speed = self.pool.apply(from_speedtest)

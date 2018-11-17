@@ -1,7 +1,7 @@
+import json
 import logging
 from datetime import datetime, timedelta, timezone
 from itertools import groupby
-import json
 
 import iso8601
 from pyramid.view import view_config, view_defaults
@@ -36,10 +36,12 @@ class IndexView:
 
         latencies = store.latency_get_between(start, end)
 
-        def grouping_field(latency): return latency.target
+        def grouping_field(latency):
+            return latency.target
 
         latencies = dict(
-            (k, list(map(lambda e: e.__dict__, g))) for k, g in groupby(sorted(latencies, key=grouping_field), grouping_field)
+            (k, list(map(lambda e: e.__dict__, g))) for k, g in
+            groupby(sorted(latencies, key=grouping_field), grouping_field)
         )
 
         for _, latencies_group in latencies.items():

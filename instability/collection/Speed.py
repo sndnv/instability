@@ -4,6 +4,12 @@ from speedtest import Speedtest
 
 
 def from_speedtest():
+    """
+    Collects network speed data based on `speedtest.net`.
+
+    :return: network speed data
+    """
+
     try:
         speedtest = Speedtest()
         speedtest.get_best_server()
@@ -23,6 +29,15 @@ def from_speedtest():
 
 class Speed:
     def __init__(self, download, upload, server, timestamp=None):
+        """
+        Network speed data container.
+
+        :param download: download speed (bits/s)
+        :param upload:  upload speed (bits/s)
+        :param server: test server
+        :param timestamp: data collection timestamp
+        """
+
         self._download = download
         self._upload = upload
         self._server = server

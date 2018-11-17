@@ -1,9 +1,10 @@
+import logging
+import os
+from threading import Thread
+
 from instability.collection.Service import Service as CollectionService
 from instability.persistence.SQLite import SQLite
 from instability.ui.Service import Service as UIService
-from threading import Thread
-import logging
-import os
 
 
 def main():

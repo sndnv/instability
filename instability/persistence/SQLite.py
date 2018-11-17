@@ -6,6 +6,12 @@ from instability.collection.Speed import Speed
 
 class SQLite:
     def __init__(self, db, check_same_thread=True):
+        """
+        SQLite-backed data store.
+
+        :param db: SQLite db file name
+        """
+
         self._connection = sqlite3.connect(
             db,
             detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES,
@@ -21,24 +27,67 @@ class SQLite:
         self._connection.close()
 
     def latency_table_exists(self):
+        """
+        Checks if the latency table already exists.
+
+        :return: `True` if the latency table exists
+        """
+
         return self.__table_exists(Latency)
 
     def speed_table_exists(self):
+        """
+        Checks if the network speed table already exists.
+
+        :return: `True` if the network speed table exists
+        """
+
         return self.__table_exists(Speed)
 
     def latency_table_size(self):
+        """
+        Retrieves the number of entries in the latency table.
+
+        :return: number of entries in the latency table
+        """
+
         return self.__table_size(Latency)
 
     def speed_table_size(self):
+        """
+        Retrieves the number of entries in the network speed table.
+
+        :return: number of entries in the network speed table
+        """
+
         return self.__table_size(Speed)
 
     def latency_table_create(self):
+        """
+        Creates the latency table.
+
+        :return: `nothing`
+        """
+
         self.__table_create(Latency)
 
     def speed_table_create(self):
+        """
+        Creates the network speed table.
+
+        :return: `nothing`
+        """
+
         self.__table_create(Speed)
 
     def latency_add(self, latency):
+        """
+        Adds the supplied latency data to the DB.
+
+        :param latency: latency data to add
+        :return: `nothing`
+        """
+
         command = "INSERT INTO latencies VALUES (?, ?, ?, ?, ?, ?)"
 
         self.db.execute(
@@ -55,6 +104,13 @@ class SQLite:
         self._connection.commit()
 
     def speed_add(self, speed):
+        """
+        Adds the supplied network speed data to the DB.
+
+        :param speed: network speed data to add
+        :return: `nothing`
+        """
+
         command = "INSERT INTO speeds VALUES (?, ?, ?, ?)"
 
         self.db.execute(
@@ -69,15 +125,43 @@ class SQLite:
         self._connection.commit()
 
     def latency_get(self):
+        """
+        Retrieves all latency entries.
+
+        :return: all latency entries
+        """
+
         return self.__get(Latency)
 
     def speed_get(self):
+        """
+        Retrieves all network speed entries.
+
+        :return: all network speed entries
+        """
+
         return self.__get(Speed)
 
     def latency_get_between(self, start, end):
+        """
+        Retrieves all latency entries between the specified timestamps.
+
+        :param start: query start date/time
+        :param end: query end date/time
+        :return: all latency entries in the specified period
+        """
+
         return self.__get_between(Latency, start, end)
 
     def speed_get_between(self, start, end):
+        """
+        Retrieves all network speed entries between the specified timestamps.
+
+        :param start: query start date/time
+        :param end: query end date/time
+        :return: all network speed entries in the specified period
+        """
+
         return self.__get_between(Speed, start, end)
 
     def __table_exists(self, collection_data_type):
