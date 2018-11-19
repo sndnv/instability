@@ -9,17 +9,19 @@ from instability.persistence.SQLite import SQLite
 
 
 class Service:
-    def __init__(self, db, targets, latency_collection_interval, speed_collection_interval):
+    def __init__(self, db, prom, targets, latency_collection_interval, speed_collection_interval):
         """
         Data collection service.
 
-        :param db: SQLite db file name
+        :param db: SQLite DB file name
+        :param prom: Prometheus collector
         :param targets: host to use for collecting latency data
         :param latency_collection_interval: latency data collection interval (in seconds)
         :param speed_collection_interval: network speed data collection interval (in seconds)
         """
 
         self.db = db
+        self.prom = prom
         self.targets = targets
         self.latency_collection_interval = latency_collection_interval
         self.speed_collection_interval = speed_collection_interval
@@ -58,6 +60,7 @@ class Service:
                             )
                         )
                         store.latency_add(latency)
+                        self.prom.latency_add(latency)
                     else:
                         self.log.error("Failed to collect latency data for target [{}]".format(target))
 
@@ -85,6 +88,7 @@ class Service:
                         )
                     )
                     store.speed_add(speed)
+                    self.prom.speed_add(speed)
                 else:
                     self.log.error("Failed to collect speed data")
 

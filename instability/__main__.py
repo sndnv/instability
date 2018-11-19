@@ -3,6 +3,7 @@ import os
 from threading import Thread
 
 from instability.collection.Service import Service as CollectionService
+from instability.persistence.Prometheus import Prometheus
 from instability.persistence.SQLite import SQLite
 from instability.ui.Service import Service as UIService
 
@@ -17,12 +18,19 @@ def main():
     data_store = os.getenv("DATA_STORE", "store.db")
     service_host = os.getenv("SERVICE_HOST", "localhost")
     service_port = int(os.getenv("SERVICE_PORT", 8000))
+    prometheus_host = os.getenv("PROMETHEUS_HOST", "localhost")
+    prometheus_port = int(os.getenv("PROMETHEUS_PORT", 9000))
     targets = [target.strip() for target in os.getenv("LATENCY_TARGETS", "").split(",")]
     latency_interval = int(os.getenv("LATENCY_COLLECTION_INTERVAL", 60))
     speed_interval = int(os.getenv("SPEED_COLLECTION_INTERVAL", 60 * 60))
 
+    prometheus = Prometheus(host=prometheus_host, port=prometheus_port)
+    prometheus.start_http_service()
+
     collection_service = CollectionService(
-        db=data_store, targets=targets,
+        db=data_store,
+        prom=prometheus,
+        targets=targets,
         latency_collection_interval=latency_interval,
         speed_collection_interval=speed_interval
     )

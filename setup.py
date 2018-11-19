@@ -6,7 +6,8 @@ requires = [
     'pyramid_jinja2',
     'waitress',
     'iso8601',
-    'speedtest-cli'
+    'speedtest-cli',
+    'prometheus_client'
 ]
 
 setup(

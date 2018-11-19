@@ -1,0 +1,175 @@
+{
+  "title": "Instability",
+  "timezone": "browser",
+  "graphTooltip": 2,
+  "templating": {
+    "list": [
+      {
+        "datasource": "prom",
+        "includeAll": true,
+        "multi": true,
+        "name": "target",
+        "query": "label_values(target)",
+        "refresh": 2,
+        "type": "query"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "legend": {
+        "avg": true,
+        "values": true
+      },
+      "repeat": "target",
+      "repeatDirection": "h",
+      "seriesOverrides": [
+        {
+          "alias": "Maximum",
+          "color": "#bf1b00",
+          "fill": 0
+        },
+        {
+          "alias": "Minimum",
+          "color": "#3f6833",
+          "fill": 0
+        },
+        {
+          "alias": "Average",
+          "color": "#e5ac0e"
+        }
+      ],
+      "targets": [
+        {
+          "expr": "latency{type=\"average\",target=~\"$target\"}",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "Average"
+        },
+        {
+          "expr": "latency{type=\"minimum\",target=~\"$target\"}",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "Minimum"
+        },
+        {
+          "expr": "latency{type=\"maximum\",target=~\"$target\"}",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "Maximum"
+        }
+      ],
+      "title": "$target",
+      "transparent": true,
+      "type": "graph",
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": "Latency",
+          "max": "100",
+          "min": "0",
+          "show": true
+        },
+        {}
+      ]
+    },
+    {
+      "gridPos": {
+        "h": 3,
+        "w": 8,
+        "x": 0,
+        "y": 9
+      },
+      "legend": {
+        "avg": true,
+        "values": true
+      },
+      "repeat": "target",
+      "repeatDirection": "h",
+      "seriesOverrides": [
+        {
+          "alias": "Loss",
+          "color": "#bf1b00"
+        }
+      ],
+      "targets": [
+        {
+          "expr": "loss{target=~\"$target\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Loss"
+        }
+      ],
+      "transparent": true,
+      "type": "graph",
+      "yaxes": [
+        {
+          "format": "percent",
+          "label": "Loss %",
+          "max": "100",
+          "min": "0",
+          "show": true
+        },
+        {}
+      ]
+    },
+    {
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 99
+      },
+      "legend": {
+        "avg": true,
+        "max": true,
+        "min": true,
+        "values": true
+      },
+      "targets": [
+        {
+          "expr": "speed{type=\"download\"} / 1000 / 1000",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Download",
+          "refId": "A"
+        },
+        {
+          "expr": "speed{type=\"upload\"} / 1000 / 1000",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Upload",
+          "refId": "B"
+        }
+      ],
+      "title": "Network Speed",
+      "transparent": true,
+      "type": "graph",
+      "yaxes": [
+        {
+          "format": "Mbits",
+          "label": "Network Speed",
+          "max": "300",
+          "min": "0",
+          "show": true
+        },
+        {}
+      ]
+    }
+  ]
+}
